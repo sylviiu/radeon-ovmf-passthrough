@@ -28,6 +28,10 @@ to make a lot of this easier, i would recommend setting up the **[chaotic-aur](h
 
 personally, i'm running my system under the **[linux-tkg-cfs](https://github.com/Frogging-Family/linux-tkg)** kernel (which is also built on & can be installed through the chaotic-aur repository) -- in my (very half-assed & limited) testing, the cpu scheduler included in this kernel seems to maintain the most stability when limited to a smaller amount of cpu cores. this kernel includes all patches required for **vfio** & **pcie acs override patch** (explained later) -- you can also run this setup using the `linux-zen` kernel.
 
+a lot of the time, i will be away from my computer, and i'll want to manage my virtual machines remotely. to do this, i'm going to be setting up [tailscale](https://tailscale.com/) and sshd (with pubkey auth, ofc)
+
+to make sure my system doesn't go to sleep while i'm away from my computer, i ran `systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target` as root.
+
 ### kernel boot parameters commandline thing
 
 okay so this one is probably going to be the most difficult to explain, but i'll do my best. most of this is configuration copied from workarounds found in bug reports lol
