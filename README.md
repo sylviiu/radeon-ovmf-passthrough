@@ -24,4 +24,28 @@ to make a lot of this easier, i would recommend setting up the **[chaotic-aur](h
 
 personally, i'm running my system under the **[linux-tkg-cfs](https://github.com/Frogging-Family/linux-tkg)** kernel (which is also built on & can be installed through the chaotic-aur repository) -- in my (very half-assed & limited) testing, the cpu scheduler included in this kernel seems to maintain the most stability when limited to a smaller amount of cpu cores
 
-### kernel config
+#### TLDR: 
+
+install your packages
+```bash
+# pacman -S qemu-desktop libvirt edk2-ovmf virt-manager dnsmasq
+```
+
+give your user permissions to system libvirtd / kvm
+```bash
+# sudo usermod -aG libvirt $(whoami)
+# sudo usermod -aG kvm $(whoami)
+```
+
+enable the libvirt service & logging component
+```bash
+# systemctl enable --now libvirtd.service virtlogd.socket
+```
+
+enable the default network configuration for libvirtd
+```bash
+# virsh net-autostart default
+# virsh net-start default
+```
+
+### kernel parameters
