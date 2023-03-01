@@ -78,3 +78,96 @@ oh, and if you want to use networking through libvirtd (as in you're not passing
 # virsh net-autostart default
 # virsh net-start default
 ```
+
+### virtual machine configuration
+
+**now this is where we get started.**
+
+open virt-manager, and go to Edit > Preferences. **make sure "Enable XML editing" is enabled.**
+
+create a new virtual machine, name it whatever you'd like, but make sure to leave "Customize configuration before install" enabled. this is where you're going to edit the XML of the virtual machine.
+
+configure the virtual machine to your liking from here. for reference, my windows virtual machine configuration file can be found [here](https://github.com/sylviiu/radeon-ovmf-passthrough/blob/main/vm.xml)
+
+a few important parts i feel like is necessary to mention:
+
+#### hugepages usage:
+
+```xml
+  <memoryBacking>
+    <hugepages/>
+  </memoryBacking>
+```
+
+if you set up hugepages, make sure to add this inside your `<domain>` tag. this instructs libvirt / qemu to utilize your hugepages that you set up.
+
+#### cpu pinning:
+
+```xml
+  <vcpu placement="static">12</vcpu>
+  <cputune>
+    <vcpupin vcpu="0" cpuset="2"/>
+    <vcpupin vcpu="1" cpuset="10"/>
+    <vcpupin vcpu="2" cpuset="3"/>
+    <vcpupin vcpu="3" cpuset="11"/>
+    <vcpupin vcpu="4" cpuset="4"/>
+    <vcpupin vcpu="5" cpuset="12"/>
+    <vcpupin vcpu="6" cpuset="5"/>
+    <vcpupin vcpu="7" cpuset="13"/>
+    <vcpupin vcpu="8" cpuset="6"/>
+    <vcpupin vcpu="9" cpuset="14"/>
+    <vcpupin vcpu="10" cpuset="7"/>
+    <vcpupin vcpu="11" cpuset="15"/>
+    <emulatorpin cpuset="0,6"/>
+  </cputune>
+```
+
+**[I HIGHLY SUGGEST YOU FOLLOW THE INSTRUCTIONS LISTED ON THE ARCHWIKI](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#CPU_pinning); RESULTS VARY SYSTEM BY SYSTEM**
+
+#### qemu `<features>` tag & general cpu configuration
+
+```xml
+  <features>
+    <acpi/>
+    <apic/>
+    <hyperv mode="passthrough">
+      <relaxed state="on"/>
+      <vapic state="on"/>
+      <spinlocks state="on" retries="8191"/>
+      <vpindex state="on"/>
+      <runtime state="on"/>
+      <synic state="on"/>
+      <stimer state="on"/>
+      <reset state="off"/>
+      <vendor_id state="on" value="randomid"/>
+      <frequencies state="on"/>
+    </hyperv>
+    <kvm>
+      <hidden state="on"/>
+    </kvm>
+    <vmport state="off"/>
+    <smm state="on"/>
+    <ioapic driver="kvm"/>
+  </features>
+  <clock offset="localtime">
+    <timer name="rtc" present="no" tickpolicy="catchup"/>
+    <timer name="pit" present="no" tickpolicy="delay"/>
+    <timer name="hpet" present="no"/>
+    <timer name="kvmclock" present="no"/>
+    <timer name="hypervclock" present="yes"/>
+  </clock>
+```
+
+i generally use these tags to help disguise the virtual machine as raw hardware, but...
+
+```xml
+  <cpu mode="host-passthrough" check="none" migratable="on">
+    <topology sockets="1" dies="1" cores="6" threads="2"/>
+    <feature policy="disable" name="rdtscp"/>
+    <feature policy="require" name="topoext"/>
+    <feature policy="disable" name="hypervisor"/>
+    <feature policy="require" name="invtsc"/>
+  </cpu>
+```
+
+will give you the best shot at hiding your virtualized state from the guest operating system. *with these tags, task manager does not report that the system is virtualized and shows the correct cpu cache sizes*
