@@ -87,6 +87,8 @@ open virt-manager, and go to Edit > Preferences. **make sure "Enable XML editing
 
 create a new virtual machine, name it whatever you'd like, but make sure to leave "Customize configuration before install" enabled. this is where you're going to edit the XML of the virtual machine.
 
+make sure to passthrough the pcie devices by going to "Add Hardware" > "PCI devices" and add both the "VGA device" and audio device listed for your specific graphics card.
+
 configure the virtual machine to your liking from here. for reference, my windows virtual machine configuration file can be found [here](https://github.com/sylviiu/radeon-ovmf-passthrough/blob/main/vm.xml)
 
 a few important parts i feel like is necessary to mention:
